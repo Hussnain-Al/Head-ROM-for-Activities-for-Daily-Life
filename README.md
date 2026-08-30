@@ -75,11 +75,12 @@ Sensor Logger v1.64 on Android, device 23129RAA4G, 20 ms sample interval
 (50 Hz nominal, 49.9 Hz measured). Recorded 28 August 2026. The phone was held
 on the forehead with a strap and refitted between recordings.
 
-Each folder under `data/raw/` holds `Gyroscope.csv`, `TotalAcceleration.csv` and
-`Metadata.csv`. Sensor Logger also writes `Accelerometer`, the uncalibrated
-streams, `Orientation` and `Annotation`; those are not committed. The script does
-not read them, `Annotation` was empty, and keeping them tripled the repository
-size.
+The repository stores the reproducible input set in `data/raw_data.zip`. On the
+first run, the MATLAB script extracts `data/raw/` automatically. Each recording
+folder contains `Gyroscope.csv`, `TotalAcceleration.csv` and `Metadata.csv`.
+Sensor Logger also writes `Accelerometer`, the uncalibrated streams,
+`Orientation` and `Annotation`; those are not included because the analysis does
+not read them and keeping them would triple the repository size.
 
 ## Repeatability
 
@@ -110,7 +111,8 @@ data/raw/
 ```
 
 Each folder needs `Gyroscope.csv` and `TotalAcceleration.csv` with columns
-`seconds_elapsed, x, y, z`. Then:
+`seconds_elapsed, x, y, z`. The included archive is extracted automatically.
+Then:
 
 ```matlab
 head_rom_analysis
