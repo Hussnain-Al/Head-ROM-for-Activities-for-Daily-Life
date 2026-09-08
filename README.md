@@ -9,6 +9,7 @@ A single-participant feasibility study using a forehead-mounted smartphone IMU t
 - Three trials per activity plus one calibration recording
 - Fixed 180 s analysis windows at 50 Hz
 - Flexion-extension, lateral bending, and axial rotation estimates
+- Trial-to-trial flexion-extension coefficient of variation (CV)
 - Straight-walking analysis with lap turns excluded
 - Reproducible MATLAB code, raw inputs, results tables, and plots
 
@@ -32,7 +33,7 @@ The script extracts `data/raw_data.zip` automatically on the first run and gener
 
 ## Processing summary
 
-Gyroscope and acceleration data are resampled to 50 Hz. Gravity is isolated with a 0.5 Hz low-pass filter, head angles are filtered at 5 Hz, and each trial is referenced to its own neutral hold. Range of motion is calculated from the 2.5th-97.5th percentile span. During walking, high-yaw-rate lap turns are removed and axial rotation is not reported.
+Gyroscope and acceleration data are resampled to 50 Hz. Gravity is isolated with a 0.5 Hz low-pass filter, head angles are filtered at 5 Hz, and each trial is referenced to its own neutral hold. Range of motion is calculated from the 2.5th-97.5th percentile span. For each task, flexion-extension CV is calculated across the three trial-level range values as 100 × SD/mean and is treated as a descriptive repeatability measure. During walking, high-yaw-rate lap turns are removed and axial rotation is not reported.
 
 ## Limits
 
