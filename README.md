@@ -27,12 +27,12 @@ The script extracts `data/raw_data.zip` automatically on the first run and gener
 - `TableII_checks.csv` — sampling, noise, drift, and mount checks
 - `TableIII_gravity_sensitivity.csv` — results at 0.3, 0.5, and 1.0 Hz gravity cutoffs
 - `TableIV_turn_sensitivity.csv` — walking results at 20, 25, and 30 deg/s turn thresholds
-- `Fig1_traces.png` — all processed 180 s movement traces
+- `Fig1_traces.png` and `Fig1_traces_updated.svg` — all processed 180 s movement traces
 - `Fig2_flexext_statistics.png` — combined mean, SD, variance, and CV plot for flexion-extension excursion
 
 ## Results preview
 
-![Processed head-angle traces](Fig1_traces.png)
+![Processed head-angle traces](Fig1_traces_updated.svg)
 
 ![Flexion-extension descriptive statistics](Fig2_flexext_statistics.png)
 
