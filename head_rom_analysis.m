@@ -90,11 +90,17 @@ disp(T); writetable(T,'TableI_results.csv')
 fprintf('\nSampling rate  %.1f Hz measured, %g resampled\n', ...
         mean(diags(:,1)), cfg.sampleRateHz);
 fprintf('Noise floor    %.2f deg while holding still\n', mean(diags(:,2)));
-fprintf('Gyro drift     %.3f deg/s removed, worst %.3f\n', ...
-        mean(abs(diags(:,3))), max(abs(diags(:,3))));
-fprintf('Mount tilt     %.1f deg spread across refits\n', ...
+nonWalkingRows = 1:3*(n-1);
+fprintf('Yaw trend      %.3f deg/s mean absolute in non-walking trials\n', ...
+        mean(abs(diags(nonWalkingRows,3))));
+fprintf('Phone angle    %.1f deg spread across refits\n', ...
         max(diags(:,4)) - min(diags(:,4)));
-writematrix(diags,'TableII_checks.csv')
+diagTask = repelem(tasks',3);
+diagTrial = repmat((1:3)',n,1);
+TChecks = table(diagTask,diagTrial,diags(:,1),diags(:,2),diags(:,3),diags(:,4), ...
+    'VariableNames',{'Task','Trial','MeasuredSampleRate_Hz','QuietHoldSD_deg', ...
+                     'YawLinearTrend_deg_per_s','InitialPhoneInclination_deg'});
+writetable(TChecks,'TableII_checks.csv')
 
 %% PART 3 - PARAMETER SENSITIVITY
 % Re-run the same pipeline near the selected settings. These checks show
@@ -332,7 +338,8 @@ function [ang, pctKept, d] = readTrial(folder, cfg, walking, window)
     yawRate = filtfilt(b,a, rad2deg((gyro - mean(gyro(h,:),1)) * zH'));
     yaw = cumtrapz(t, yawRate);
 
-    % 6H window, then residual drift removed
+    % 6H window, then remove its linear yaw trend. This trend is not a
+    % pure sensor-drift estimate when the task contains real turning.
     i1 = find(t >= margin, 1);
     sel = i1 : i1 + window*fs - 1;
     tw = (0:numel(sel)-1)'/fs;
