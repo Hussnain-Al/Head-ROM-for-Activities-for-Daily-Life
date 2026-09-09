@@ -26,10 +26,13 @@ The script extracts `data/raw_data.zip` automatically on the first run and gener
 - `TableI_results.csv` — task-level range-of-motion results
 - `TableII_checks.csv` — sampling, noise, drift, and mount checks
 - `Fig1_traces.png` — all processed 180 s movement traces
+- `Fig2_flexext_statistics.png` — combined mean, SD, variance, and CV plot for flexion-extension excursion
 
 ## Results preview
 
 ![Processed head-angle traces](Fig1_traces.png)
+
+![Flexion-extension descriptive statistics](Fig2_flexext_statistics.png)
 
 ## Processing summary
 
