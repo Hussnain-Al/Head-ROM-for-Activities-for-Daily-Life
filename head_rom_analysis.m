@@ -206,6 +206,7 @@ ylabel(tl,'Angle relative to each trial median (deg)', ...
     'FontName','Arial','FontSize',9)
 
 print(fig,'Fig1_traces.png','-dpng','-r300')
+print(fig,'Fig1_traces_updated.svg','-dsvg')
 
 %% PART 5 - FLEXION-EXTENSION DESCRIPTIVE STATISTICS FIGURE
 % One figure with two panels keeps unlike units on defensible axes.
