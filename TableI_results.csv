@@ -1,4 +1,4 @@
-Task,FlexExt_Mean_deg,FlexExt_SD_deg,FlexExt_Var_deg2,FlexExt_CV_pct,LatBend_deg,AxialRot_deg,PctSagRange,Kept_pct
+Task,FlexExt_Excursion_Mean_deg,FlexExt_Excursion_SD_deg,FlexExt_Excursion_Var_deg2,FlexExt_CV_pct,LatBend_Excursion_deg,AxialRot_Excursion_deg,PctSagCalibration,Kept_pct
 "Seated, laptop",11.6,5.5,29.8,47,5.1,6.9,10,100
 "Standing, laptop",10.3,4.1,16.7,40,3.6,6.1,9,100
 "Standing, phone",19.5,8.9,79.5,46,3.8,7.2,16,100
