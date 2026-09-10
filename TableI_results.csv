@@ -1,6 +1,6 @@
-Task,FlexExt_Excursion_Mean_deg,FlexExt_Excursion_SD_deg,FlexExt_Excursion_Var_deg2,FlexExt_CV_pct,LatBend_Excursion_deg,AxialRot_Excursion_deg,PctSagCalibration,Kept_pct
-"Seated, laptop",11.6,5.5,29.8,47,5.1,6.9,10,100
-"Standing, laptop",10.3,4.1,16.7,40,3.6,6.1,9,100
-"Standing, phone",19.5,8.9,79.5,46,3.8,7.2,16,100
-"Eating",13.2,2.6,6.6,20,5.4,15.5,11,100
-"Walking",14.3,5.3,27.9,37,3.6,NaN,12,77
+Task,FlexExt_ROM_Mean_deg,FlexExt_ROM_SD_deg,FlexExt_ROM_Var_deg2,FlexExt_CV_pct,LatBend_ROM_Mean_deg,LatBend_ROM_SD_deg,AxialRot_ROM_Mean_deg,AxialRot_ROM_SD_deg,PctSagCalibration,Kept_pct
+"Seated, laptop",10.8,4.2,17.7,39,5.2,2.3,6.9,3.8,9,100
+"Standing, laptop",9.7,3.4,11.7,35,3.5,1.2,6.0,1.4,8,100
+"Standing, phone",19.5,8.9,79.6,46,3.8,1.0,6.8,3.4,16,100
+Eating,13.1,2.7,7.5,21,5.4,2.6,15.0,12.6,11,100
+Walking,11.7,4.4,19.1,37,3.6,0.6,,,10,77
