@@ -2,6 +2,8 @@
 
 A single-participant feasibility study using a forehead-mounted smartphone IMU to measure head ROM during seated laptop work, standing laptop work, standing phone use, eating, and level walking.
 
+For methods, results, and limitations, see the [feasibility report (PDF)](Head_ROM_Feasibility_Report.pdf).
+
 ![Five recorded activities](task_setup.png)
 
 ## Run
