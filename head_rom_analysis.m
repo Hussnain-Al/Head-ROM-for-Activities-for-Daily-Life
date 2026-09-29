@@ -209,23 +209,17 @@ for planeIndex = 1:3
         if any(~isfinite(values))
             continue  % Walking axial rotation is displayed in Figure 1.
         end
-        % With three trials, show every point; quartiles only summarize them.
+        % Descriptive quartiles across three trial ROM values.
         q1 = (values(1)+values(2))/2;
         q3 = (values(2)+values(3))/2;
         x = taskIndex;
         patch(ax,x+[-.24 .24 .24 -.24],[q1 q1 q3 q3],c, ...
-            'FaceAlpha',.70,'EdgeColor','k','LineWidth',1)
+            'FaceAlpha',1,'EdgeColor','k','LineWidth',1)
         plot(ax,x+[-.24 .24],[values(2) values(2)],'k-','LineWidth',1.4)
         plot(ax,[x x],[values(1) q1],'k-','LineWidth',1)
         plot(ax,[x x],[q3 values(3)],'k-','LineWidth',1)
         plot(ax,x+[-.11 .11],[values(1) values(1)],'k-','LineWidth',1)
         plot(ax,x+[-.11 .11],[values(3) values(3)],'k-','LineWidth',1)
-        for trialIndex = 1:3
-            plot(ax,x+.085*(trialIndex-2), ...
-                trialROMAll(taskIndex,trialIndex,planeIndex),'o', ...
-                'Color','k','MarkerFaceColor',c,'MarkerSize',4.5, ...
-                'LineWidth',1)
-        end
     end
 
     ax.Color = 'w';

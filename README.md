@@ -50,7 +50,7 @@ Walking consists of straight paths separated by approximately 180 deg direction 
 - `TableI_results.csv` — mean and SD for all three head ROM planes, flexion-extension variance and CV, and retained data
 - `TableII_checks.csv` — per-trial sampling rate, neutral-hold SD, yaw trend, and neutral phone inclination
 - `Fig1_traces.png` and `Fig1_traces_updated.svg` — 180 s head-angle traces, including walking axial rotation with its lap turns
-- `Fig2_flexext_statistics.png` — one box per task in each plane, colored by task, with all three trial ROM values shown as dots. Each trial ROM is its 97.5th minus 2.5th percentile angle. Boxes summarize just three values, so interpret them descriptively. Walking axial angles appear in Figure 1, but walking axial ROM is excluded from Figure 2 because lap turns include whole-body rotation. Mean, SD, variance, and CV remain in `TableI_results.csv`.
+- `Fig2_flexext_statistics.png` — one box per task in each plane, with solid task colors and black outlines. The centre line is the median; boxes span the quartiles and whiskers span the minimum and maximum. Each trial ROM is its 97.5th minus 2.5th percentile angle. Boxes summarize just three values, so interpret them descriptively. Walking axial angles appear in Figure 1, but walking axial ROM is excluded from Figure 2 because lap turns include whole-body rotation. Mean, SD, variance, and CV remain in `TableI_results.csv`.
 
 ## Separate validation
 
