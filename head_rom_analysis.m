@@ -200,7 +200,7 @@ ylabel(traceLayout,'Head angle (deg; axial detrended)', ...
 print(fig,'Fig1_traces.png','-dpng','-r300')
 print(fig,'Fig1_traces_updated.svg','-dsvg')
 
-%% PART 6 - DIRECTIONAL HEAD ANGLE BOXPLOTS
+%% PART 6 - SIGNED HEAD ANGLE RANGES
 figStats = figure('Color','w','Units','centimeters','Position',[2 2 29 10.5]);
 statsLayout = tiledlayout(figStats,1,3,'TileSpacing','compact','Padding','compact');
 taskColors = [0.00 0.45 0.74; 0.85 0.33 0.10; 0.47 0.67 0.19; ...
@@ -212,32 +212,18 @@ for planeIndex = 1:3
     hold(ax,'on')
     for taskIndex = 1:nTasks
         c = taskColors(taskIndex,:);
-        for directionIndex = 1:2
-            values = reshape(trialBoundsAll(taskIndex,:,planeIndex,directionIndex),[],1);
-            values = values(isfinite(values));
-            if numel(values) ~= 3
+        for trialIndex = 1:3
+            lower = trialBoundsAll(taskIndex,trialIndex,planeIndex,1);
+            upper = trialBoundsAll(taskIndex,trialIndex,planeIndex,2);
+            if ~isfinite(lower) || ~isfinite(upper)
                 continue  % Walking axial rotation is displayed in Figure 1.
             end
-            if directionIndex == 1
-                values = min(0,values);
-                boxAlpha = .18;
-            else
-                values = max(0,values);
-                boxAlpha = .52;
-            end
-            values = sort(values);
-            x = taskIndex + (directionIndex-1.5)*.30;
-            q1 = (values(1)+values(2))/2;
-            q3 = (values(2)+values(3))/2;
-            plot(ax,[x x],[values(1) values(3)],'Color',c,'LineWidth',1.1)
-            plot(ax,x+[-.07 .07],values([1 1]),'Color',c,'LineWidth',1.1)
-            plot(ax,x+[-.07 .07],values([3 3]),'Color',c,'LineWidth',1.1)
-            patch(ax,x+[-.10 .10 .10 -.10],[q1 q1 q3 q3],c, ...
-                'FaceAlpha',boxAlpha,'EdgeColor',c,'LineWidth',1.1)
-            plot(ax,x+[-.10 .10],values([2 2]),'Color',c,'LineWidth',1.5)
-            scatter(ax,x+[-.035 0 .035],values,18,c,'filled', ...
-                'MarkerEdgeColor','w','LineWidth',.3)
-            plot(ax,x,mean(values),'kd','MarkerSize',4,'MarkerFaceColor','k')
+            x = taskIndex + .16*(trialIndex-2);
+            plot(ax,[x x],[lower upper],'Color',c,'LineWidth',1.8)
+            plot(ax,x,lower,'o','Color','k','MarkerFaceColor',c, ...
+                'MarkerSize',4.5,'LineWidth',1.1)
+            plot(ax,x,upper,'s','Color','k','MarkerFaceColor',c, ...
+                'MarkerSize',4.5,'LineWidth',1.1)
         end
     end
 
@@ -258,11 +244,15 @@ for planeIndex = 1:3
     title(ax,planeNames{planeIndex},'FontWeight','normal')
     box(ax,'on')
     if planeIndex == 3
+        lowerKey = plot(ax,nan,nan,'ko','MarkerFaceColor',[.5 .5 .5],'MarkerSize',4.5);
+        upperKey = plot(ax,nan,nan,'ks','MarkerFaceColor',[.5 .5 .5],'MarkerSize',4.5);
+        legend(ax,[lowerKey upperKey],{'Lower','Upper'}, ...
+            'Location','northeast','FontSize',7,'Box','off')
+    end
+    if planeIndex == 3
         text(ax,5,0,'turns in Fig. 1','HorizontalAlignment','center', ...
             'VerticalAlignment','bottom','FontSize',7)
     end
 end
 
-sgtitle(statsLayout,'Head angles: light = negative, dark = positive (n = 3)', ...
-    'FontName','Arial','FontSize',11,'FontWeight','normal')
 print(figStats,'Fig2_flexext_statistics.png','-dpng','-r300')

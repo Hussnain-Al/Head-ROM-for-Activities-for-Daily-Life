@@ -50,7 +50,7 @@ Walking consists of straight paths separated by approximately 180 deg direction 
 - `TableI_results.csv` — mean and SD for all three head ROM planes, flexion-extension variance and CV, and retained data
 - `TableII_checks.csv` — per-trial sampling rate, neutral-hold SD, yaw trend, and neutral phone inclination
 - `Fig1_traces.png` and `Fig1_traces_updated.svg` — 180 s head-angle traces, including walking axial rotation with its lap turns
-- `Fig2_flexext_statistics.png` — directional angle box plots for all three planes, colored by task. The light box shows the negative 2.5th-percentile bound (capped at zero); the dark box shows the positive 97.5th-percentile bound (floored at zero). Each box summarizes the three trials: interpolated quartiles, min–max whiskers, trial dots, and a mean diamond. Walking axial angles are shown in Figure 1 but excluded from this task comparison because of whole-body turns. ROM mean, SD, variance, and CV remain in `TableI_results.csv`.
+- `Fig2_flexext_statistics.png` — three signed angle ranges per task in each plane, colored by task. Each line joins one trial's 2.5th and 97.5th percentile angles; its length equals that trial's ROM. Black-outlined circles mark the lower bound and squares the upper bound. The zero line separates directions. Walking axial angles are shown in Figure 1 but excluded from this task comparison because of whole-body turns. Mean, SD, variance, and CV remain in `TableI_results.csv`.
 
 ## Separate validation
 
