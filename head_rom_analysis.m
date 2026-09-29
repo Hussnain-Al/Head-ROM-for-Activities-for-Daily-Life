@@ -47,7 +47,7 @@ fprintf('Sagittal calibration ROM: %.1f deg (%.1f flexion, %.1f extension)\n\n',
 nTasks = numel(tasks);
 ROMMean = zeros(nTasks,3);
 ROMSD = zeros(nTasks,3);
-trialBoundsAll = nan(nTasks,3,3,2);  % negative and positive limits
+trialROMAll = nan(nTasks,3,3);  % task x trial x plane
 keptPct = zeros(nTasks,1);
 curves = cell(nTasks,1);
 walkingAxialTrace = nan(cfg.window*cfg.sampleRateHz,3);
@@ -55,8 +55,6 @@ qualityChecks = zeros(3*nTasks,4);
 
 for taskIndex = 1:nTasks
     trialROM = nan(3,3);
-    trialLower = nan(3,3);
-    trialUpper = nan(3,3);
     trialKeptPct = zeros(3,1);
     taskCurves = nan(cfg.window*cfg.sampleRateHz,3,3);
 
@@ -70,16 +68,12 @@ for taskIndex = 1:nTasks
         end
 
         for planeIndex = 1:3
-            [trialROM(trialIndex,planeIndex), ...
-             trialLower(trialIndex,planeIndex), ...
-             trialUpper(trialIndex,planeIndex)] = ...
+            trialROM(trialIndex,planeIndex) = ...
                 calculatePercentileROM(angles(:,planeIndex));
         end
 
         if isWalkingTask(taskIndex)
             trialROM(trialIndex,3) = NaN;
-            trialLower(trialIndex,3) = NaN;
-            trialUpper(trialIndex,3) = NaN;
         end
 
         row = 3*(taskIndex-1) + trialIndex;
@@ -90,8 +84,7 @@ for taskIndex = 1:nTasks
 
     ROMMean(taskIndex,:) = mean(trialROM,1);
     ROMSD(taskIndex,:) = std(trialROM,0,1);
-    trialBoundsAll(taskIndex,:,:,1) = reshape(trialLower,[1 3 3]);
-    trialBoundsAll(taskIndex,:,:,2) = reshape(trialUpper,[1 3 3]);
+    trialROMAll(taskIndex,:,:) = reshape(trialROM,[1 3 3]);
     keptPct(taskIndex) = mean(trialKeptPct);
     curves{taskIndex} = taskCurves;
 end
@@ -200,7 +193,7 @@ ylabel(traceLayout,'Head angle (deg; axial detrended)', ...
 print(fig,'Fig1_traces.png','-dpng','-r300')
 print(fig,'Fig1_traces_updated.svg','-dsvg')
 
-%% PART 6 - SIGNED HEAD ANGLE RANGES
+%% PART 6 - TRIAL HEAD ROM DISTRIBUTIONS
 figStats = figure('Color','w','Units','centimeters','Position',[2 2 29 10.5]);
 statsLayout = tiledlayout(figStats,1,3,'TileSpacing','compact','Padding','compact');
 taskColors = [0.00 0.45 0.74; 0.85 0.33 0.10; 0.47 0.67 0.19; ...
@@ -212,18 +205,26 @@ for planeIndex = 1:3
     hold(ax,'on')
     for taskIndex = 1:nTasks
         c = taskColors(taskIndex,:);
+        values = sort(reshape(trialROMAll(taskIndex,:,planeIndex),[],1));
+        if any(~isfinite(values))
+            continue  % Walking axial rotation is displayed in Figure 1.
+        end
+        % With three trials, show every point; quartiles only summarize them.
+        q1 = (values(1)+values(2))/2;
+        q3 = (values(2)+values(3))/2;
+        x = taskIndex;
+        patch(ax,x+[-.24 .24 .24 -.24],[q1 q1 q3 q3],c, ...
+            'FaceAlpha',.70,'EdgeColor','k','LineWidth',1)
+        plot(ax,x+[-.24 .24],[values(2) values(2)],'k-','LineWidth',1.4)
+        plot(ax,[x x],[values(1) q1],'k-','LineWidth',1)
+        plot(ax,[x x],[q3 values(3)],'k-','LineWidth',1)
+        plot(ax,x+[-.11 .11],[values(1) values(1)],'k-','LineWidth',1)
+        plot(ax,x+[-.11 .11],[values(3) values(3)],'k-','LineWidth',1)
         for trialIndex = 1:3
-            lower = trialBoundsAll(taskIndex,trialIndex,planeIndex,1);
-            upper = trialBoundsAll(taskIndex,trialIndex,planeIndex,2);
-            if ~isfinite(lower) || ~isfinite(upper)
-                continue  % Walking axial rotation is displayed in Figure 1.
-            end
-            x = taskIndex + .16*(trialIndex-2);
-            plot(ax,[x x],[lower upper],'Color',c,'LineWidth',1.8)
-            plot(ax,x,lower,'o','Color','k','MarkerFaceColor',c, ...
-                'MarkerSize',4.5,'LineWidth',1.1)
-            plot(ax,x,upper,'s','Color','k','MarkerFaceColor',c, ...
-                'MarkerSize',4.5,'LineWidth',1.1)
+            plot(ax,x+.085*(trialIndex-2), ...
+                trialROMAll(taskIndex,trialIndex,planeIndex),'o', ...
+                'Color','k','MarkerFaceColor',c,'MarkerSize',4.5, ...
+                'LineWidth',1)
         end
     end
 
@@ -239,18 +240,12 @@ for planeIndex = 1:3
     ax.YGrid = 'on';
     ax.GridAlpha = 0.18;
     ax.XLim = [0.5 nTasks+0.5];
-    yline(ax,0,'Color',[.3 .3 .3],'LineWidth',.8)
-    ylabel(ax,'Angle from neutral (deg)')
+    ax.YLim(1) = 0;
+    ylabel(ax,'ROM (deg)')
     title(ax,planeNames{planeIndex},'FontWeight','normal')
     box(ax,'on')
     if planeIndex == 3
-        lowerKey = plot(ax,nan,nan,'ko','MarkerFaceColor',[.5 .5 .5],'MarkerSize',4.5);
-        upperKey = plot(ax,nan,nan,'ks','MarkerFaceColor',[.5 .5 .5],'MarkerSize',4.5);
-        legend(ax,[lowerKey upperKey],{'Lower','Upper'}, ...
-            'Location','northeast','FontSize',7,'Box','off')
-    end
-    if planeIndex == 3
-        text(ax,5,0,'turns in Fig. 1','HorizontalAlignment','center', ...
+        text(ax,5,0,'see Fig. 1','HorizontalAlignment','center', ...
             'VerticalAlignment','bottom','FontSize',7)
     end
 end
