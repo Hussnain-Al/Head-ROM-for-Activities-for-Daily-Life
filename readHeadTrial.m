@@ -1,4 +1,4 @@
-function [angles,pctKept,quality] = readHeadTrial(folder,cfg,walking,window)
+function [angles,pctKept,quality,allAngles] = readHeadTrial(folder,cfg,walking,window)
 %READHEADTRIAL Process one phone recording into three head-angle channels.
 % Columns of ANGLES: flexion-extension, lateral bending, axial rotation.
 
@@ -36,7 +36,7 @@ sampleNumber = (1:numel(t))';
 candidateStarts = find(relativeTime <= ...
     cfg.neutralSearchEnd-cfg.neutralDuration & ...
     sampleNumber+neutralSamples-1 <= numel(t) & ...
-    t(min(sampleNumber+neutralSamples-1,numel(t)))+cfg.margin+window <= t(end));
+    t(min(sampleNumber+neutralSamples-1,numel(t)))+window <= t(end));
 assert(~isempty(candidateStarts),'%s: no complete neutral hold found.',folder)
 [~,bestCandidate] = min(quietScore(candidateStarts));
 neutralStart = candidateStarts(bestCandidate);
@@ -66,9 +66,8 @@ yawRate = rad2deg((gyro-neutralGyroBias)*headVertical');
 yawRate = filtfilt(yawB,yawA,yawRate);
 yaw = cumtrapz(t,yawRate);
 
-% Start after the neutral hold and margin, then select the fixed window.
-analysisStartTime = t(neutralRows(end))+cfg.margin;
-firstRow = find(t >= analysisStartTime,1);
+% Start at the next sample after the neutral hold.
+firstRow = neutralRows(end)+1;
 lastRow = firstRow+window*cfg.sampleRateHz-1;
 assert(lastRow <= numel(t),'%s: insufficient data after the neutral hold.',folder)
 selectedRows = firstRow:lastRow;
@@ -79,6 +78,7 @@ yawLine = polyfit(windowTime,yaw(selectedRows),1);
 quality.yawTrendDegPerSec = yawLine(1);
 angles = [pitch(selectedRows),roll(selectedRows), ...
           yaw(selectedRows)-polyval(yawLine,windowTime)];
+allAngles = angles;
 
 % Remove lap turns only from the walking task.
 if walking

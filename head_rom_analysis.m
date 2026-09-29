@@ -10,7 +10,6 @@ cfg.sampleRateHz       = 50;
 cfg.yawCutoffHz        = 5;
 cfg.gravityCutoffHz    = 0.5;
 cfg.window             = 180;
-cfg.margin             = 2;
 cfg.neutralSearchEnd   = 30;
 cfg.neutralDuration    = 10;
 cfg.turnRateDegPerSec  = 25;
@@ -50,6 +49,7 @@ ROMMean = zeros(nTasks,3);
 ROMSD = zeros(nTasks,3);
 keptPct = zeros(nTasks,1);
 curves = cell(nTasks,1);
+walkingAxialTrace = nan(cfg.window*cfg.sampleRateHz,3);
 qualityChecks = zeros(3*nTasks,4);
 
 for taskIndex = 1:nTasks
@@ -58,10 +58,13 @@ for taskIndex = 1:nTasks
     taskCurves = nan(cfg.window*cfg.sampleRateHz,3,3);
 
     for trialIndex = 1:3
-        [angles,trialKeptPct(trialIndex),quality] = readHeadTrial( ...
+        [angles,trialKeptPct(trialIndex),quality,allAngles] = readHeadTrial( ...
             fullfile(dataDir,folders{taskIndex}{trialIndex}),cfg, ...
             isWalkingTask(taskIndex));
         taskCurves(:,:,trialIndex) = angles;
+        if isWalkingTask(taskIndex)
+            walkingAxialTrace(:,trialIndex) = allAngles(:,3);
+        end
 
         for planeIndex = 1:3
             trialROM(trialIndex,planeIndex) = ...
@@ -124,7 +127,7 @@ fprintf('Phone angle    %.1f deg spread across neutral holds\n', ...
 t = (0:cfg.window*cfg.sampleRateHz-1)'/cfg.sampleRateHz;
 planes = {'Flexion-extension','Lateral bending','Axial rotation'};
 yLimits = [-35 35; -12 12; -35 35];
-fig = figure('Color','w','Units','centimeters','Position',[1 1 26 24]);
+fig = figure('Color','w','Units','centimeters','Position',[1 1 29 20]);
 traceLayout = tiledlayout(fig,nTasks,3,'TileSpacing','compact','Padding','compact');
 
 for taskIndex = 1:nTasks
@@ -135,18 +138,21 @@ for taskIndex = 1:nTasks
         ax.XColor = 'k';
         ax.YColor = 'k';
         ax.FontName = 'Arial';
-        ax.FontSize = 7.5;
+        ax.FontSize = 8;
         ax.LineWidth = 0.7;
         ax.GridAlpha = 0.18;
         colororder(ax,[0.00 0.45 0.74; 0.85 0.33 0.10; 0.93 0.69 0.13])
 
         X = squeeze(curves{taskIndex}(:,planeIndex,:));
         if isWalkingTask(taskIndex) && planeIndex == 3
-            plot(ax,t,X,'Color',[.72 .72 .72],'LineWidth',0.8)
-            resultLabel = 'not reported';
-            titleColor = [.45 .45 .45];
+            % Display the complete estimated axial trace, including lap turns.
+            % Only the straight-walking portions enter the ROM calculation.
+            X = walkingAxialTrace;
+            plot(ax,t,X,'LineWidth',1.2)
+            resultLabel = 'turns shown; ROM not reported';
+            titleColor = 'k';
         else
-            plot(ax,t,X,'LineWidth',0.8)
+            plot(ax,t,X,'LineWidth',1.2)
             resultLabel = sprintf('%.1f \\pm %.1f deg', ...
                 ROMMean(taskIndex,planeIndex),ROMSD(taskIndex,planeIndex));
             titleColor = 'k';
@@ -163,7 +169,14 @@ for taskIndex = 1:nTasks
         else
             title(ax,resultLabel,'FontWeight','normal','Color',titleColor)
         end
-        ylim(ax,yLimits(planeIndex,:));
+        visibleValues = X(isfinite(X));
+        if isempty(visibleValues)
+            ylim(ax,yLimits(planeIndex,:));
+        else
+            bounds = [min(visibleValues) max(visibleValues)];
+            padding = max(1,0.10*diff(bounds));
+            ylim(ax,bounds+[-padding padding]);
+        end
         xlim(ax,[0 cfg.window]);
         if planeIndex == 1, ylabel(ax,tasks{taskIndex}), end
         if taskIndex < nTasks, xticklabels(ax,[]), end

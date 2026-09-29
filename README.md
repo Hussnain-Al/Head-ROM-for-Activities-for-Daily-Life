@@ -2,9 +2,11 @@
 
 A single-participant feasibility study using a forehead-mounted smartphone IMU to measure head ROM during seated laptop work, standing laptop work, standing phone use, eating, and level walking.
 
-For methods, results, and limitations, see the [feasibility report (PDF)](Head_ROM_Feasibility_Report.pdf).
+For the previously published report, see the [feasibility report (PDF)](Head_Movement_ADL_Feasibility_Report.pdf). The code and preview figures now begin the 180 s window immediately after the neutral hold; the PDF has not yet been revised.
 
 ![Five recorded activities](task_setup.png)
+
+![Head-angle traces, including walking axial rotation](Fig1_traces.png)
 
 ## Run
 
@@ -22,10 +24,10 @@ The main analysis uses one fixed parameter set:
 | Gravity cutoff | 0.5 Hz |
 | Yaw-rate cutoff | 5 Hz |
 | Neutral hold | Quietest complete 10 s block in the first 30 s |
-| Task window | 180 s, beginning 2 s after the neutral hold |
+| Task window | 180 s, beginning immediately after the neutral hold |
 | Walking-turn threshold | 25 deg/s* |
 
-*Turn-threshold effect after the corrected neutral processing: 20 deg/s produced 11.94 deg mean walking flexion-extension ROM with 69.27% retained; 25 deg/s produced 11.69 deg with 76.53% retained; and 30 deg/s produced 11.68 deg with 77.37% retained. The ROM result is stable across these thresholds, while the retained amount changes.
+*Turn-threshold effect: 20 deg/s produced 11.94 deg mean walking flexion-extension ROM with 69.63% retained; 25 deg/s produced 11.70 deg with 76.97% retained; and 30 deg/s produced 11.70 deg with 77.79% retained. The ROM result is stable across these thresholds, while the retained amount changes.
 
 ## Processing
 
@@ -39,13 +41,13 @@ Head ROM is calculated as:
 
 This limits the effect of isolated peaks without manually deleting data. Mean, sample SD, variance, and CV are calculated across the three trial-level flexion-extension ROM values. Flexion-extension and lateral traces use the neutral reference; axial traces have a fitted linear trend removed. No trace is median-centred.
 
-Walking consists of straight paths separated by approximately 180 deg direction changes. Samples around detected turns are removed from the straight-walking calculation. Walking axial ROM is not reported because a single head sensor cannot separate head motion from whole-body rotation during lap turns.
+Walking consists of straight paths separated by approximately 180 deg direction changes. Samples within approximately 1 s of a yaw rate exceeding 25 deg/s are excluded from the straight-walking calculations to reduce abrupt changes at lap turns. The complete detrended walking axial-angle trace, including turns, appears in Figure 1. Walking axial ROM is not reported because a single head sensor cannot separate head motion from whole-body rotation during lap turns.
 
 ## Outputs
 
 - `TableI_results.csv` — mean and SD for all three head ROM planes, flexion-extension variance and CV, and retained data
 - `TableII_checks.csv` — per-trial sampling rate, neutral-hold SD, yaw trend, and neutral phone inclination
-- `Fig1_traces.png` and `Fig1_traces_updated.svg` — 180 s head-angle traces
+- `Fig1_traces.png` and `Fig1_traces_updated.svg` — 180 s head-angle traces, including walking axial rotation with its lap turns
 - `Fig2_flexext_statistics.png` — mean, SD, variance, and CV
 
 ## Separate validation
@@ -70,5 +72,4 @@ The committed tables and previews were regenerated with an independent Python re
 - D. Demaree, J. Brignone, M. Bromberg, and H. Zhang, [“Preliminary Study on Effects of Neck Exoskeleton Structural Design in Patients With Amyotrophic Lateral Sclerosis,”](https://doi.org/10.1109/TNSRE.2024.3397584) *IEEE Transactions on Neural Systems and Rehabilitation Engineering*, 2024.
 - A. R. Weston et al., [“Head and Trunk Kinematics during Activities of Daily Living with and without Mechanical Restriction of Cervical Motion,”](https://doi.org/10.3390/s22083071) *Sensors*, 2022. The study used wearable head and trunk sensors with a 6 Hz low-pass Butterworth filter.
 - V. T. van Hees et al., [“Separating Movement and Gravity Components in an Acceleration Signal and Implications for the Assessment of Human Daily Physical Activity,”](https://doi.org/10.1371/journal.pone.0061691) *PLOS ONE*, 2013. The study evaluated 0.2 and 0.5 Hz cutoffs for gravity separation.
-- T. Fawden et al., [“Detection of Gait Events Using Ear-Worn IMUs During Functional Movement Tasks,”](https://doi.org/10.3390/s25113629) *Sensors*, 2025. Turning was identified using yaw angle and a 30 deg/s angular-velocity condition.
 - [Android sensor coordinate system and sampling guidance](https://developer.android.com/develop/sensors-and-location/sensors/sensors_overview#sensors-coords).

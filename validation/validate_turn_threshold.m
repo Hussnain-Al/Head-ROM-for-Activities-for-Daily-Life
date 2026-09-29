@@ -12,7 +12,6 @@ cfg.sampleRateHz = 50;
 cfg.yawCutoffHz = 5;
 cfg.gravityCutoffHz = 0.5;
 cfg.window = 180;
-cfg.margin = 2;
 cfg.neutralSearchEnd = 30;
 cfg.neutralDuration = 10;
 cfg.turnRateDegPerSec = 25;
