@@ -8,6 +8,8 @@ For the previously published report, see the [feasibility report (PDF)](Head_Mov
 
 ![Head-angle traces, including walking axial rotation](Fig1_traces.png)
 
+![Directional head-angle box plots across five tasks](Fig2_flexext_statistics.png)
+
 ## Run
 
 Requires MATLAB R2019b or later and Signal Processing Toolbox.
@@ -48,7 +50,7 @@ Walking consists of straight paths separated by approximately 180 deg direction 
 - `TableI_results.csv` — mean and SD for all three head ROM planes, flexion-extension variance and CV, and retained data
 - `TableII_checks.csv` — per-trial sampling rate, neutral-hold SD, yaw trend, and neutral phone inclination
 - `Fig1_traces.png` and `Fig1_traces_updated.svg` — 180 s head-angle traces, including walking axial rotation with its lap turns
-- `Fig2_flexext_statistics.png` — mean, SD, variance, and CV
+- `Fig2_flexext_statistics.png` — directional angle box plots for all three planes, colored by task. The light box shows the negative 2.5th-percentile bound (capped at zero); the dark box shows the positive 97.5th-percentile bound (floored at zero). Each box summarizes the three trials: interpolated quartiles, min–max whiskers, trial dots, and a mean diamond. Walking axial angles are shown in Figure 1 but excluded from this task comparison because of whole-body turns. ROM mean, SD, variance, and CV remain in `TableI_results.csv`.
 
 ## Separate validation
 

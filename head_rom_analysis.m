@@ -47,6 +47,7 @@ fprintf('Sagittal calibration ROM: %.1f deg (%.1f flexion, %.1f extension)\n\n',
 nTasks = numel(tasks);
 ROMMean = zeros(nTasks,3);
 ROMSD = zeros(nTasks,3);
+trialBoundsAll = nan(nTasks,3,3,2);  % negative and positive limits
 keptPct = zeros(nTasks,1);
 curves = cell(nTasks,1);
 walkingAxialTrace = nan(cfg.window*cfg.sampleRateHz,3);
@@ -54,6 +55,8 @@ qualityChecks = zeros(3*nTasks,4);
 
 for taskIndex = 1:nTasks
     trialROM = nan(3,3);
+    trialLower = nan(3,3);
+    trialUpper = nan(3,3);
     trialKeptPct = zeros(3,1);
     taskCurves = nan(cfg.window*cfg.sampleRateHz,3,3);
 
@@ -67,12 +70,16 @@ for taskIndex = 1:nTasks
         end
 
         for planeIndex = 1:3
-            trialROM(trialIndex,planeIndex) = ...
+            [trialROM(trialIndex,planeIndex), ...
+             trialLower(trialIndex,planeIndex), ...
+             trialUpper(trialIndex,planeIndex)] = ...
                 calculatePercentileROM(angles(:,planeIndex));
         end
 
         if isWalkingTask(taskIndex)
             trialROM(trialIndex,3) = NaN;
+            trialLower(trialIndex,3) = NaN;
+            trialUpper(trialIndex,3) = NaN;
         end
 
         row = 3*(taskIndex-1) + trialIndex;
@@ -83,6 +90,8 @@ for taskIndex = 1:nTasks
 
     ROMMean(taskIndex,:) = mean(trialROM,1);
     ROMSD(taskIndex,:) = std(trialROM,0,1);
+    trialBoundsAll(taskIndex,:,:,1) = reshape(trialLower,[1 3 3]);
+    trialBoundsAll(taskIndex,:,:,2) = reshape(trialUpper,[1 3 3]);
     keptPct(taskIndex) = mean(trialKeptPct);
     curves{taskIndex} = taskCurves;
 end
@@ -191,55 +200,69 @@ ylabel(traceLayout,'Head angle (deg; axial detrended)', ...
 print(fig,'Fig1_traces.png','-dpng','-r300')
 print(fig,'Fig1_traces_updated.svg','-dsvg')
 
-%% PART 6 - FLEXION-EXTENSION STATISTICS
-figStats = figure('Color','w','Units','centimeters','Position',[2 2 29 13]);
-statsLayout = tiledlayout(figStats,1,2,'TileSpacing','loose','Padding','compact');
-x = 1:nTasks;
+%% PART 6 - DIRECTIONAL HEAD ANGLE BOXPLOTS
+figStats = figure('Color','w','Units','centimeters','Position',[2 2 29 10.5]);
+statsLayout = tiledlayout(figStats,1,3,'TileSpacing','compact','Padding','compact');
+taskColors = [0.00 0.45 0.74; 0.85 0.33 0.10; 0.47 0.67 0.19; ...
+              0.49 0.18 0.56; 0.20 0.62 0.63];
+planeNames = {'Flexion-extension','Lateral bending','Axial rotation'};
 
-axMean = nexttile(statsLayout);
-meanBars = bar(axMean,x,flexExtMean,0.62,'FaceColor',[0.20 0.45 0.70], ...
-    'EdgeColor','none','DisplayName','Mean');
-hold(axMean,'on')
-sdWhiskers = errorbar(axMean,x,flexExtMean,flexExtSD,'k', ...
-    'LineStyle','none','LineWidth',1.2,'CapSize',9,'DisplayName','+/- SD');
-ylim(axMean,[0 1.18*max(flexExtMean+flexExtSD)])
-ylabel(axMean,'ROM (deg)')
-title(axMean,'Mean and standard deviation','FontWeight','normal')
-legend(axMean,[meanBars sdWhiskers],{'Mean','+/- SD'}, ...
-    'Location','northeast','Orientation','horizontal', ...
-    'NumColumns',2,'FontSize',8,'Box','off')
+for planeIndex = 1:3
+    ax = nexttile(statsLayout);
+    hold(ax,'on')
+    for taskIndex = 1:nTasks
+        c = taskColors(taskIndex,:);
+        for directionIndex = 1:2
+            values = reshape(trialBoundsAll(taskIndex,:,planeIndex,directionIndex),[],1);
+            values = values(isfinite(values));
+            if numel(values) ~= 3
+                continue  % Walking axial rotation is displayed in Figure 1.
+            end
+            if directionIndex == 1
+                values = min(0,values);
+                boxAlpha = .18;
+            else
+                values = max(0,values);
+                boxAlpha = .52;
+            end
+            values = sort(values);
+            x = taskIndex + (directionIndex-1.5)*.30;
+            q1 = (values(1)+values(2))/2;
+            q3 = (values(2)+values(3))/2;
+            plot(ax,[x x],[values(1) values(3)],'Color',c,'LineWidth',1.1)
+            plot(ax,x+[-.07 .07],values([1 1]),'Color',c,'LineWidth',1.1)
+            plot(ax,x+[-.07 .07],values([3 3]),'Color',c,'LineWidth',1.1)
+            patch(ax,x+[-.10 .10 .10 -.10],[q1 q1 q3 q3],c, ...
+                'FaceAlpha',boxAlpha,'EdgeColor',c,'LineWidth',1.1)
+            plot(ax,x+[-.10 .10],values([2 2]),'Color',c,'LineWidth',1.5)
+            scatter(ax,x+[-.035 0 .035],values,18,c,'filled', ...
+                'MarkerEdgeColor','w','LineWidth',.3)
+            plot(ax,x,mean(values),'kd','MarkerSize',4,'MarkerFaceColor','k')
+        end
+    end
 
-axRepeat = nexttile(statsLayout);
-yyaxis(axRepeat,'left')
-varianceBars = bar(axRepeat,x,flexExtVar,0.62,'FaceColor',[0.85 0.55 0.12], ...
-    'EdgeColor','none','DisplayName','Variance');
-ylim(axRepeat,[0 1.18*max(flexExtVar)])
-ylabel(axRepeat,'Variance (deg^2)')
-yyaxis(axRepeat,'right')
-CVPoints = scatter(axRepeat,x,flexExtCV,32,'kd','filled','DisplayName','CV');
-ylim(axRepeat,[0 max(50,1.18*max(flexExtCV))])
-ylabel(axRepeat,'CV (%)')
-title(axRepeat,'Repeatability','FontWeight','normal')
-legend(axRepeat,[varianceBars CVPoints],{'Variance','CV'}, ...
-    'Location','northeast','Orientation','horizontal', ...
-    'NumColumns',2,'FontSize',8,'Box','off')
-
-for ax = [axMean axRepeat]
     ax.Color = 'w';
     ax.XColor = 'k';
+    ax.YColor = 'k';
     ax.FontName = 'Arial';
-    ax.FontSize = 8.5;
+    ax.FontSize = 8;
     ax.LineWidth = 0.8;
-    ax.XTick = x;
+    ax.XTick = 1:nTasks;
     ax.XTickLabel = tasks;
-    ax.XTickLabelRotation = 18;
+    ax.XTickLabelRotation = 24;
     ax.YGrid = 'on';
     ax.GridAlpha = 0.18;
+    ax.XLim = [0.5 nTasks+0.5];
+    yline(ax,0,'Color',[.3 .3 .3],'LineWidth',.8)
+    ylabel(ax,'Angle from neutral (deg)')
+    title(ax,planeNames{planeIndex},'FontWeight','normal')
     box(ax,'on')
+    if planeIndex == 3
+        text(ax,5,0,'turns in Fig. 1','HorizontalAlignment','center', ...
+            'VerticalAlignment','bottom','FontSize',7)
+    end
 end
-axRepeat.YAxis(1).Color = 'k';
-axRepeat.YAxis(2).Color = 'k';
 
-sgtitle(statsLayout,'Flexion-extension ROM across three trials per task', ...
+sgtitle(statsLayout,'Head angles: light = negative, dark = positive (n = 3)', ...
     'FontName','Arial','FontSize',11,'FontWeight','normal')
 print(figStats,'Fig2_flexext_statistics.png','-dpng','-r300')
